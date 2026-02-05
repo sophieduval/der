@@ -15,7 +15,7 @@ mkdir "%dest%" 2>nul
 cd /d "%dest%"
 
 :: PARALLEL DOWNLOADS using PowerShell jobs
-powershell -Command "$repo='%repo%';$dest='%dest%';0..10|ForEach-Object{$i=$_.ToString('D2');Start-Job -ScriptBlock{param($r,$d,$n)(New-Object Net.WebClient).DownloadFile(\"$r/blob_$n.dat\",\"$d\blob_$n.dat\")} -ArgumentList $repo,$dest,$i}|Wait-Job|Out-Null"
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $repo='%repo%';$dest='%dest%';0..10|ForEach-Object{$i=$_.ToString('D2');Start-Job -ScriptBlock{param($r,$d,$n)(New-Object Net.WebClient).DownloadFile(\"$r/blob_$n.dat\",\"$d\blob_$n.dat\")} -ArgumentList $repo,$dest,$i}|Wait-Job|Out-Null"
 
 :: Verify
 if not exist "blob_00.dat" exit /b 1
