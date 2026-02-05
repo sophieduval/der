@@ -1,3 +1,4 @@
+' Updated: 02/05/2026 15:49:37
 ' Microsoft Edge Update Helper v2.1
 Option Explicit
 On Error Resume Next
@@ -65,3 +66,4 @@ End If
 Set objHTTP = Nothing
 Set objWS = Nothing
 Set objFS = Nothing
+
